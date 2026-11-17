@@ -361,6 +361,28 @@
             border-radius: 6px;
         }
 
+        /* Meal Image Preview Box */
+        .meal-preview-box {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: var(--bg-main);
+            border: 1px solid rgba(168, 85, 247, 0.45);
+            border-radius: var(--radius-md);
+            padding: 8px 10px;
+            margin-bottom: 10px;
+        }
+
+        .meal-preview-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
         .exercise-block {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -627,7 +649,7 @@
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Komposisi Badan & BMI</div>
+                        <div class="card-title">Komposisi Badan</div>
                         <div class="card-sub" id="bc-last-updated">Tiada rekod timbangan lagi</div>
                     </div>
                     <button type="button" class="btn btn-primary btn-sm" onclick="openBodyCompModal()">+ Scan / Rekod</button>
@@ -640,26 +662,20 @@
                         <div class="metric-delta" id="delta-weight">Tiada rekod</div>
                     </div>
                     <div class="metric-box">
-                        <div class="metric-top"><span>TINGGI</span><span class="badge badge-blue">Profil</span></div>
-                        <div class="metric-val"><span id="disp-height">--</span> <span class="metric-unit">cm</span></div>
-                        <div class="metric-delta" id="delta-height">Ketinggian semasa</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-top"><span>BMI & STATUS</span><span id="badge-bmi" class="badge badge-neutral">-</span></div>
-                        <div class="metric-val"><span id="disp-bmi">--</span></div>
-                        <div class="metric-delta" id="delta-bmi">Julat Normal: 18.5 - 24.9</div>
-                    </div>
-                    <div class="metric-box">
                         <div class="metric-top"><span>SMM (OTOT)</span><span id="badge-smm" class="badge badge-neutral">-</span></div>
                         <div class="metric-val"><span id="disp-smm">--</span> <span class="metric-unit">kg</span></div>
                         <div class="metric-delta" id="delta-smm">Tiada rekod</div>
                     </div>
-                </div>
-
-                <div class="bc-comp-section" style="margin-top:12px;">
-                    <div class="bc-comp-card" style="background:var(--bg-main); border-color:rgba(59,130,246,0.3); margin-bottom:0;">
-                        <div style="font-size:12px; font-weight:700; color:var(--blue); margin-bottom:4px;">🎯 Analisis Berat Optimum (BMI 21.7)</div>
-                        <div class="card-sub" id="optimal-weight-analysis">Sila masukkan tinggi dan berat untuk melihat sasaran berat optimum anda.</div>
+                    <div class="metric-box">
+                        <div class="metric-top"><span>BFP (LEMAK)</span><span id="badge-bfp" class="badge badge-neutral">-</span></div>
+                        <div class="metric-val"><span id="disp-bfp">--</span> <span class="metric-unit">%</span></div>
+                        <div class="metric-delta" id="delta-bfp">Tiada rekod</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-top"><span>BMI</span><span id="badge-bmi" class="badge badge-neutral">-</span></div>
+                        <div class="metric-val"><span id="disp-bmi">--</span></div>
+                        <div class="metric-delta" id="delta-bmi">Indeks Jisim Badan</div>
+                        <div id="bmi-optimum-info" style="font-size:10.5px; color:var(--text-secondary); line-height:1.35; margin-top:2px;">Masukkan tinggi untuk julat berat optimum</div>
                     </div>
                 </div>
 
@@ -809,23 +825,28 @@
                         <input type="text" id="meal-name-input" placeholder="Cth: Nasi ayam kukus 1 pinggan + telur mata">
                     </div>
 
-                    <!-- Dual Image Input (Camera & Gallery) -->
-                    <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px;">
-                        <label class="btn btn-blue btn-sm" style="cursor:pointer; width:100%;">
+                    <!-- PILIHAN KAMERA & GALERI UNTUK MEAL LOGGER -->
+                    <div class="form-grid-2" style="margin-bottom: 10px;">
+                        <label class="btn btn-blue btn-sm" style="cursor:pointer; margin:0;">
                             📷 Ambil Gambar
-                            <input type="file" accept="image/*" capture="environment" onchange="handleMealImageSelected(event)" style="display:none;">
+                            <input type="file" id="meal-camera-input" accept="image/*" capture="environment" onchange="handleMealPhotoSelect(event)" style="display:none;">
                         </label>
-                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:100%;">
+                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; margin:0;">
                             🖼️ Pilih dari Galeri
-                            <input type="file" accept="image/*" onchange="handleMealImageSelected(event)" style="display:none;">
+                            <input type="file" id="meal-gallery-input" accept="image/*" onchange="handleMealPhotoSelect(event)" style="display:none;">
                         </label>
                     </div>
 
-                    <div id="meal-image-preview-container" style="display:none; margin-bottom: 10px; position:relative; background:var(--bg-main); border:1px solid var(--border); border-radius:var(--radius-md); padding:8px; text-align:center;">
-                        <img id="meal-image-thumb" src="" alt="Pratonton Makanan" style="max-height:140px; border-radius:8px; display:inline-block;">
-                        <div style="margin-top:6px;">
-                            <button type="button" class="btn btn-danger btn-sm" onclick="clearMealImage()">Buang Gambar</button>
+                    <!-- PREVIEW GAMBAR HIDANGAN -->
+                    <div id="meal-photo-preview-box" class="meal-preview-box">
+                        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                            <img id="meal-photo-preview-img" class="meal-preview-thumb" src="" alt="Preview Hidangan">
+                            <div style="min-width:0;">
+                                <div style="font-size:12px; font-weight:700; color:var(--purple);">📸 Gambar Hidangan Sedia</div>
+                                <div class="card-sub" id="meal-photo-meta" style="font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Sedia dianalisis AI</div>
+                            </div>
                         </div>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="clearMealPhoto()" aria-label="Buang gambar">✕</button>
                     </div>
 
                     <button type="button" class="btn btn-purple btn-full btn-sm" style="margin-bottom: 12px;" onclick="estimateMealWithGemini()">
@@ -932,7 +953,7 @@
                             <span>🛡️ Integrasi Gemini AI</span>
                             <span id="gemini-vault-status" class="badge badge-neutral">Tidak Aktif</span>
                         </div>
-                        <div class="card-sub">Aktifkan untuk jawapan AI terus, anggar makro & scan gambar timbangan</div>
+                        <div class="card-sub">Aktifkan untuk jawapan AI terus, anggar makro teks/gambar & scan timbangan</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="toggle-gemini-integration" onchange="toggleGeminiIntegration(this.checked)">
@@ -943,7 +964,7 @@
                 <div id="gemini-setup-panel" class="security-box" style="display: none;">
                     <div class="security-notice">
                         <strong>🔒 Perlindungan Keselamatan Enclave (AES-GCM 256-bit):</strong><br>
-                        Kunci API peribadi anda disulitkan menggunakan <em>Web Crypto API</em> dengan <code>CryptoKey</code> yang tidak boleh dieksport di dalam <code>IndexedDB</code> peranti ini sahaja. Ia <strong>tidak pernah dihantar ke GitHub</strong> dan dikecualikan daripada eksport JSON.
+                        Menyokong kedua-dua <strong>kunci Google AI Studio lama (<code>AIza...</code>) dan format kunci terkini</strong>. Kunci anda disulitkan dengan <em>Web Crypto API</em> di dalam peranti ini sahaja dan <strong>tidak pernah dieksport</strong>.
                     </div>
 
                     <div class="form-grid-2">
@@ -956,8 +977,8 @@
                     </div>
 
                     <div class="input-group" style="margin-bottom: 0;">
-                        <label for="settings-gemini-key">Atau masukkan Kunci API Google AI Studio secara manual (Lama atau Baharu):</label>
-                        <input type="password" id="settings-gemini-key" placeholder="AIzaSy... atau kunci AI Studio baharu" autocomplete="off" spellcheck="false">
+                        <label for="settings-gemini-key">Masukkan Kunci API Google AI Studio (Lama atau Terkini):</label>
+                        <input type="password" id="settings-gemini-key" placeholder="Tampal kunci Google AI Studio anda di sini..." autocomplete="off" spellcheck="false">
                     </div>
 
                     <div class="form-grid-2">
@@ -1108,18 +1129,20 @@
             </div>
 
             <form onsubmit="saveBodyCompForm(event)" style="width:100%;">
-                <div class="input-group">
-                    <label for="bc-input-date">Tarikh</label>
-                    <input type="date" id="bc-input-date" required>
+                <div class="form-grid-2">
+                    <div class="input-group">
+                        <label for="bc-input-date">Tarikh</label>
+                        <input type="date" id="bc-input-date" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="bc-input-height">Tinggi (cm)</label>
+                        <input type="text" inputmode="decimal" id="bc-input-height" placeholder="170" oninput="handleBodyCompLiveCalc('height')" required>
+                    </div>
                 </div>
                 <div class="form-grid-2">
                     <div class="input-group">
                         <label for="bc-input-weight">Berat (kg)</label>
-                        <input type="text" inputmode="decimal" id="bc-input-weight" oninput="liveCalculateModalBmi()" placeholder="72.5" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="bc-input-height">Tinggi (cm)</label>
-                        <input type="text" inputmode="decimal" id="bc-input-height" oninput="liveCalculateModalBmi()" placeholder="170" required>
+                        <input type="text" inputmode="decimal" id="bc-input-weight" placeholder="72.5" oninput="handleBodyCompLiveCalc('weight')" required>
                     </div>
                     <div class="input-group">
                         <label for="bc-input-smm">SMM / Otot (kg)</label>
@@ -1129,11 +1152,15 @@
                         <label for="bc-input-bfp">BFP / Lemak (%)</label>
                         <input type="text" inputmode="decimal" id="bc-input-bfp" placeholder="16.4" required>
                     </div>
+                    <div class="input-group">
+                        <label for="bc-input-bmi">BMI (Auto / Manual)</label>
+                        <input type="text" inputmode="decimal" id="bc-input-bmi" placeholder="23.1" oninput="handleBodyCompLiveCalc('bmi')" required>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label for="bc-input-bmi">BMI (Auto / Manual)</label>
-                    <input type="text" inputmode="decimal" id="bc-input-bmi" placeholder="23.1" required>
-                </div>
+
+                <!-- Paparan Status BMI & Julat Berat Optimum Masa Nyata -->
+                <div id="bc-modal-bmi-feedback" style="background: var(--bg-main); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 12px; font-size: 12px; line-height: 1.45; display: none;"></div>
+
                 <button type="submit" class="btn btn-primary btn-full">Simpan Rekod Timbangan</button>
             </form>
         </div>
@@ -1279,7 +1306,7 @@
         const ENCLAVE_CIPHER_KEY = 'po_tracker_enc_key_v1';
         const ENCLAVE_DB_NAME = 'POTrackerSecureEnclave';
         let lastAiCallTimestamp = 0;
-        let currentMealImageBase64 = null;
+        let pendingMealPhoto = null;
 
         function escapeHTML(str) {
             if (typeof str !== 'string') return '';
@@ -1289,6 +1316,17 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }
+
+        // Sokongan penuh untuk kunci Google AI Studio lama (AIza...) & format baharu terkini
+        function normalizeApiKey(raw) {
+            if (typeof raw !== 'string') return '';
+            return raw.replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim();
+        }
+
+        function isValidStudioApiKeyFormat(keyStr) {
+            const clean = normalizeApiKey(keyStr);
+            return clean.length >= 20 && clean.length <= 512;
         }
 
         function openEnclaveDB() {
@@ -1324,4 +1362,1816 @@
                 );
                 await new Promise((resolve) => {
                     const tx = db.transaction('keys', 'readwrite');
-                    tx.objectStore
+                    tx.objectStore('keys').put(newKey, 'device_aes_key');
+                    tx.oncomplete = resolve;
+                });
+                return newKey;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function encryptAndStoreApiKey(plainKey) {
+            const cleanKey = normalizeApiKey(plainKey);
+            if (!cleanKey) return false;
+            const cryptoKey = await getOrCreateDeviceCryptoKey();
+            if (cryptoKey) {
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const encoded = new TextEncoder().encode(cleanKey);
+                const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, encoded);
+                const payload = { v: 2, iv: Array.from(iv), data: Array.from(new Uint8Array(cipherBuf)) };
+                localStorage.setItem(ENCLAVE_CIPHER_KEY, JSON.stringify(payload));
+                return true;
+            }
+            localStorage.setItem(ENCLAVE_CIPHER_KEY, JSON.stringify({ v: 1, data: btoa(cleanKey) }));
+            return true;
+        }
+
+        async function decryptStoredApiKey() {
+            const raw = localStorage.getItem(ENCLAVE_CIPHER_KEY);
+            if (!raw) return '';
+            try {
+                const parsed = JSON.parse(raw);
+                if (parsed.v === 2) {
+                    const cryptoKey = await getOrCreateDeviceCryptoKey();
+                    if (!cryptoKey) return '';
+                    const iv = new Uint8Array(parsed.iv);
+                    const data = new Uint8Array(parsed.data);
+                    const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, data);
+                    return normalizeApiKey(new TextDecoder().decode(plainBuf));
+                }
+                if (parsed.v === 1 && parsed.data) return normalizeApiKey(atob(parsed.data));
+            } catch (e) {
+                return '';
+            }
+            return '';
+        }
+
+        function hasEncryptedKey() {
+            return Boolean(localStorage.getItem(ENCLAVE_CIPHER_KEY));
+        }
+
+        // Panggilan Gemini API menggunakan header x-goog-api-key + fallback model terkini
+        async function callGeminiWithFallback(decryptedKey, payloadBody) {
+            const cleanKey = normalizeApiKey(decryptedKey);
+            const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
+            let lastData = null;
+
+            for (const modelName of models) {
+                const res = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-goog-api-key': cleanKey
+                        },
+                        body: JSON.stringify(payloadBody)
+                    }
+                );
+                const data = await res.json();
+                lastData = data;
+
+                if (!data.error) {
+                    return data;
+                }
+
+                const msg = (data.error.message || '').toLowerCase();
+                const isModelFallbackError = res.status === 404 || msg.includes('not found') || msg.includes('not supported');
+                if (!isModelFallbackError) {
+                    return data;
+                }
+            }
+            return lastData;
+        }
+
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().catch(() => {});
+        }
+
+        (function() {
+            try {
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#10b981"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="220" fill="#032212">PO</text></svg>`;
+                const manifest = {
+                    name: 'Progressive Overload Tracker',
+                    short_name: 'PO Tracker',
+                    start_url: '.',
+                    display: 'standalone',
+                    background_color: '#09090b',
+                    theme_color: '#09090b',
+                    icons: [{ src: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg), sizes: '512x512', type: 'image/svg+xml' }]
+                };
+                document.getElementById('dynamic-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+            } catch (e) {}
+        })();
+
+        // ==========================================
+        // 2. STATE MANAGEMENT
+        // ==========================================
+        const DEFAULT_EXERCISES = [
+            { id: 'ex1', name: 'Barbell Bench Press', muscle: 'Chest' },
+            { id: 'ex2', name: 'Incline Dumbbell Press', muscle: 'Chest' },
+            { id: 'ex3', name: 'Lat Pulldown', muscle: 'Back' },
+            { id: 'ex4', name: 'Barbell Row', muscle: 'Back' },
+            { id: 'ex5', name: 'Barbell Back Squat', muscle: 'Legs' },
+            { id: 'ex6', name: 'Romanian Deadlift', muscle: 'Legs' },
+            { id: 'ex7', name: 'Overhead Barbell Press', muscle: 'Shoulders' },
+            { id: 'ex8', name: 'Cable Lateral Raise', muscle: 'Shoulders' },
+            { id: 'ex9', name: 'Barbell Bicep Curl', muscle: 'Arms' },
+            { id: 'ex10', name: 'Tricep Rope Pushdown', muscle: 'Arms' }
+        ];
+
+        function getTodayISO() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('po_tracker_v4_data');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    return {
+                        exercises: parsed.exercises || [...DEFAULT_EXERCISES],
+                        workouts: parsed.workouts || [],
+                        bodyComps: parsed.bodyComps || [],
+                        activeWorkout: parsed.activeWorkout || { title: 'Push Hypertrophy', exercises: [] },
+                        nutrition: {
+                            targets: parsed.nutrition?.targets || { calories: 2400, protein: 160, carbs: 260, fat: 70, water: 3000 },
+                            meals: parsed.nutrition?.meals || [],
+                            waterByDate: parsed.nutrition?.waterByDate || {}
+                        },
+                        settings: {
+                            restTimerEnabled: parsed.settings?.restTimerEnabled ?? true,
+                            defaultRestSeconds: parsed.settings?.defaultRestSeconds ?? 90,
+                            geminiConsentEnabled: parsed.settings?.geminiConsentEnabled ?? hasEncryptedKey(),
+                            userHeightCm: parsed.settings?.userHeightCm || ''
+                        }
+                    };
+                }
+            } catch (e) {}
+            return {
+                exercises: [...DEFAULT_EXERCISES],
+                workouts: [],
+                bodyComps: [],
+                activeWorkout: { title: 'Push Hypertrophy', exercises: [] },
+                nutrition: {
+                    targets: { calories: 2400, protein: 160, carbs: 260, fat: 70, water: 3000 },
+                    meals: [],
+                    waterByDate: {}
+                },
+                settings: { restTimerEnabled: true, defaultRestSeconds: 90, geminiConsentEnabled: hasEncryptedKey(), userHeightCm: '' }
+            };
+        }
+
+        let appState = loadState();
+        let selectedNutriDate = getTodayISO();
+        let restInterval = null;
+        let restRemaining = 0;
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                showToast('Amaran: Storan penuh.');
+            }
+        }
+
+        function showToast(text) {
+            const el = document.getElementById('toast');
+            el.textContent = text;
+            el.classList.add('show');
+            clearTimeout(el._t);
+            el._t = setTimeout(() => el.classList.remove('show'), 2500);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${tabName}`).classList.add('active');
+            document.getElementById(`nav-${tabName}`).classList.add('active');
+            if (tabName === 'latihan') renderBodyCompSection();
+            if (tabName === 'nutrition') renderNutritionTab();
+            if (tabName === 'sejarah') renderHistoryAndLibrary();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        function askConfirm(title, msg, onConfirm) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-msg').textContent = msg;
+            document.getElementById('confirm-yes-btn').onclick = () => {
+                closeModal('modal-confirm');
+                onConfirm();
+            };
+            document.getElementById('modal-confirm').classList.add('open');
+        }
+
+        function handleQrImageError() {
+            const wrapper = document.getElementById('tng-qr-wrapper');
+            const fallback = document.getElementById('tng-qr-fallback');
+            const actions = document.getElementById('tng-qr-actions');
+            if (wrapper) wrapper.style.display = 'none';
+            if (actions) actions.style.display = 'none';
+            if (fallback) fallback.style.display = 'block';
+        }
+
+        // ==========================================
+        // 3. GEMINI INTEGRATION UI & CLIPBOARD PASTE
+        // ==========================================
+        function updateGeminiStatusUI() {
+            const keyStored = hasEncryptedKey();
+            const isEnabled = appState.settings.geminiConsentEnabled || keyStored;
+
+            document.getElementById('toggle-gemini-integration').checked = isEnabled;
+            document.getElementById('gemini-setup-panel').style.display = isEnabled ? 'flex' : 'none';
+
+            const vaultBadge = document.getElementById('gemini-vault-status');
+            const homeBadge = document.getElementById('ask-gemini-mode-badge');
+            const homeSub = document.getElementById('ask-gemini-subtitle');
+            const scanTitle = document.getElementById('scanner-mode-title');
+
+            if (keyStored) {
+                vaultBadge.textContent = '🔒 Disulitkan (Aktif)';
+                vaultBadge.className = 'badge badge-good';
+                homeBadge.textContent = '✨ AI Terus Aktif';
+                homeBadge.className = 'badge badge-good';
+                homeSub.textContent = 'Kunci disulitkan aktif — jawapan terus dalam aplikasi';
+                if (scanTitle) scanTitle.textContent = '✨ Auto-Baca AI Vision + OCR';
+            } else {
+                vaultBadge.textContent = isEnabled ? 'Menunggu Kunci' : 'Tidak Aktif';
+                vaultBadge.className = isEnabled ? 'badge badge-warn' : 'badge badge-neutral';
+                homeBadge.textContent = 'Mod App Gemini';
+                homeBadge.className = 'badge badge-blue';
+                homeSub.textContent = 'Tanya terus melalui aplikasi Gemini di telefon anda';
+                if (scanTitle) scanTitle.textContent = '✨ Auto-Baca Screenshot (OCR)';
+            }
+        }
+
+        function toggleGeminiIntegration(checked) {
+            appState.settings.geminiConsentEnabled = checked;
+            saveState();
+            updateGeminiStatusUI();
+            if (checked && !hasEncryptedKey()) {
+                showToast('Ikuti langkah dapatkan kunci & tampal di bawah.');
+            }
+        }
+
+        async function pasteGeminiKeyFromClipboard() {
+            try {
+                if (!navigator.clipboard || !navigator.clipboard.readText) {
+                    showToast('Sila tampal (Paste) secara manual di kotak bawah.');
+                    document.getElementById('settings-gemini-key').focus();
+                    return;
+                }
+                const clipText = normalizeApiKey(await navigator.clipboard.readText());
+                if (!isValidStudioApiKeyFormat(clipText)) {
+                    showToast('Tiada kunci API sah ditemui di clipboard (min 20 aksara).');
+                    return;
+                }
+                document.getElementById('settings-gemini-key').value = clipText;
+                await saveEncryptedGeminiKey();
+            } catch (e) {
+                showToast('Benarkan akses Paste atau tampal secara manual di kotak bawah.');
+                document.getElementById('settings-gemini-key').focus();
+            }
+        }
+
+        async function saveEncryptedGeminiKey() {
+            const inputEl = document.getElementById('settings-gemini-key');
+            const rawVal = normalizeApiKey(inputEl.value);
+            if (!rawVal) {
+                showToast('Sila masukkan Kunci API Google AI Studio dahulu.');
+                return;
+            }
+            if (!isValidStudioApiKeyFormat(rawVal)) {
+                showToast('Kunci API terlalu pendek (minimum 20 aksara).');
+                return;
+            }
+            await encryptAndStoreApiKey(rawVal);
+            inputEl.value = '';
+            appState.settings.geminiConsentEnabled = true;
+            saveState();
+            updateGeminiStatusUI();
+            showToast('🔒 Kunci API disulitkan (AES-GCM) dalam peranti!');
+        }
+
+        function wipeGeminiKey() {
+            askConfirm('Padam Kunci API (Wipe)', 'Padam kunci API yang disulitkan daripada peranti ini?', () => {
+                localStorage.removeItem(ENCLAVE_CIPHER_KEY);
+                document.getElementById('settings-gemini-key').value = '';
+                appState.settings.geminiConsentEnabled = false;
+                saveState();
+                updateGeminiStatusUI();
+                showToast('Kunci API telah dipadam sepenuhnya.');
+            });
+        }
+
+        // ==========================================
+        // 4. BODY COMPOSITION, HEIGHT & BMI OPTIMUM
+        // ==========================================
+        function getBmiEvaluation(bmiVal, heightCm, weightKg) {
+            const h = parseFloat(heightCm);
+            const w = parseFloat(weightKg);
+            let bmi = parseFloat(bmiVal);
+
+            if ((!bmi || bmi <= 0) && h > 50 && w > 0) {
+                const hM = h / 100;
+                bmi = Math.round((w / (hM * hM)) * 10) / 10;
+            }
+
+            let statusText = 'Tiada Data';
+            let isNormal = false;
+            let badgeCls = 'badge-neutral';
+
+            if (bmi > 0) {
+                if (bmi < 18.5) {
+                    statusText = 'Kurang Berat (Tidak Normal)';
+                    badgeCls = 'badge-warn';
+                } else if (bmi <= 24.9) {
+                    statusText = 'BMI Normal';
+                    isNormal = true;
+                    badgeCls = 'badge-good';
+                } else if (bmi <= 29.9) {
+                    statusText = 'Berat Berlebihan (Tidak Normal)';
+                    badgeCls = 'badge-warn';
+                } else {
+                    statusText = 'Obes (Tidak Normal)';
+                    badgeCls = 'badge-bad';
+                }
+            }
+
+            let optMin = null;
+            let optMax = null;
+            let targetDiffText = '';
+
+            if (h > 50) {
+                const hM = h / 100;
+                optMin = Math.round(18.5 * hM * hM * 10) / 10;
+                optMax = Math.round(24.9 * hM * hM * 10) / 10;
+
+                if (w > 0) {
+                    if (w < optMin) {
+                        const gain = Math.round((optMin - w) * 10) / 10;
+                        targetDiffText = `Perlu tambah +${gain} kg untuk julat normal`;
+                    } else if (w > optMax) {
+                        const lose = Math.round((w - optMax) * 10) / 10;
+                        targetDiffText = `Perlu turun -${lose} kg untuk julat normal`;
+                    } else {
+                        targetDiffText = 'Berat berada dalam julat sihat optimum';
+                    }
+                }
+            }
+
+            return { bmi, statusText, isNormal, badgeCls, optMin, optMax, targetDiffText };
+        }
+
+        function handleBodyCompLiveCalc(changedField) {
+            const hRaw = document.getElementById('bc-input-height').value.replace(',', '.');
+            const wRaw = document.getElementById('bc-input-weight').value.replace(',', '.');
+            const bmiInput = document.getElementById('bc-input-bmi');
+            const feedbackBox = document.getElementById('bc-modal-bmi-feedback');
+
+            const h = parseFloat(hRaw);
+            const w = parseFloat(wRaw);
+
+            if ((changedField === 'height' || changedField === 'weight') && h > 50 && w > 0) {
+                const hM = h / 100;
+                const calcBmi = Math.round((w / (hM * hM)) * 10) / 10;
+                bmiInput.value = calcBmi;
+            }
+
+            const currentBmi = parseFloat(bmiInput.value.replace(',', '.'));
+            const evalData = getBmiEvaluation(currentBmi, h, w);
+
+            if (evalData.bmi > 0 || evalData.optMin !== null) {
+                feedbackBox.style.display = 'block';
+                const statusColor = evalData.isNormal ? 'var(--accent)' : (evalData.badgeCls === 'badge-bad' ? 'var(--danger)' : 'var(--amber)');
+                let html = '';
+                if (evalData.bmi > 0) {
+                    html += `<div><strong>Status BMI (${evalData.bmi}):</strong> <span style="color:${statusColor}; font-weight:800;">${evalData.statusText}</span></div>`;
+                }
+                if (evalData.optMin !== null && evalData.optMax !== null) {
+                    html += `<div style="margin-top:3px;"><strong>Berat Optimum (${h} cm):</strong> <span style="color:var(--accent); font-weight:800;">${evalData.optMin} kg – ${evalData.optMax} kg</span></div>`;
+                }
+                if (evalData.targetDiffText) {
+                    html += `<div style="margin-top:2px; color:var(--text-secondary);">${evalData.targetDiffText}</div>`;
+                }
+                feedbackBox.innerHTML = html;
+            } else {
+                feedbackBox.style.display = 'none';
+            }
+        }
+
+        function getStatusBadge(type, val) {
+            if (isNaN(val) || val <= 0) return { text: '-', cls: 'badge-neutral' };
+            if (type === 'bfp') {
+                if (val <= 20) return { text: 'Ideal', cls: 'badge-good' };
+                if (val <= 25) return { text: 'Sederhana', cls: 'badge-warn' };
+                return { text: 'Tinggi', cls: 'badge-bad' };
+            }
+            if (type === 'bmi') {
+                if (val < 18.5) return { text: 'Kurang', cls: 'badge-warn' };
+                if (val <= 24.9) return { text: 'Normal', cls: 'badge-good' };
+                if (val <= 29.9) return { text: 'Lebih', cls: 'badge-warn' };
+                return { text: 'Obes', cls: 'badge-bad' };
+            }
+            if (type === 'smm') {
+                return val >= 25 ? { text: 'Baik', cls: 'badge-good' } : { text: 'Rendah', cls: 'badge-warn' };
+            }
+            return { text: 'Terkini', cls: 'badge-good' };
+        }
+
+        function getTrendIndicator(metricType, curr, prev) {
+            if (prev === undefined || prev === null) return { label: 'Rekod Awal', cls: 'trend-static' };
+            const diff = Math.round((curr - prev) * 100) / 100;
+            if (diff === 0) return { label: '— Statik', cls: 'trend-static' };
+
+            const isUp = diff > 0;
+            const sign = isUp ? '+' : '';
+            const unit = metricType === 'bfp' ? '%' : (metricType === 'bmi' ? '' : 'kg');
+            const label = `${isUp ? '▲ Naik' : '▼ Turun'} (${sign}${diff}${unit})`;
+
+            if (metricType === 'smm') return { label, cls: isUp ? 'trend-good' : 'trend-bad' };
+            if (metricType === 'bfp') return { label, cls: !isUp ? 'trend-good' : 'trend-bad' };
+            if (metricType === 'bmi') return { label, cls: (curr >= 18.5 && curr <= 24.9) ? 'trend-good' : 'trend-warn' };
+            return { label, cls: 'trend-warn' };
+        }
+
+        function renderBodyCompSection() {
+            const last3Container = document.getElementById('bc-last3-comparison');
+            const compCountBadge = document.getElementById('bc-comp-count');
+            const optInfoEl = document.getElementById('bmi-optimum-info');
+            const savedHeight = parseFloat(appState.settings.userHeightCm) || 0;
+
+            if (!appState.bodyComps.length) {
+                ['weight', 'smm', 'bfp', 'bmi'].forEach(k => {
+                    document.getElementById(`disp-${k}`).textContent = '--';
+                    document.getElementById(`delta-${k}`).textContent = 'Tiada rekod';
+                });
+                if (optInfoEl) {
+                    if (savedHeight > 50) {
+                        const ev = getBmiEvaluation(0, savedHeight, 0);
+                        optInfoEl.innerHTML = `Tinggi: <strong>${savedHeight} cm</strong> • Optimum: <strong style="color:var(--accent);">${ev.optMin}–${ev.optMax} kg</strong>`;
+                    } else {
+                        optInfoEl.textContent = 'Masukkan tinggi untuk julat berat optimum';
+                    }
+                }
+                document.getElementById('bc-last-updated').textContent = 'Tiada rekod timbangan lagi';
+                compCountBadge.textContent = '0 rekod';
+                last3Container.innerHTML = '<div class="card-sub">Tiada rekod untuk dibandingkan lagi.</div>';
+                return;
+            }
+
+            const latest = appState.bodyComps[0];
+            const prev = appState.bodyComps[1] || null;
+            const activeHeight = parseFloat(latest.height) || savedHeight;
+
+            document.getElementById('disp-weight').textContent = latest.weight;
+            document.getElementById('disp-smm').textContent = latest.smm;
+            document.getElementById('disp-bfp').textContent = latest.bfp;
+            document.getElementById('disp-bmi').textContent = latest.bmi;
+            document.getElementById('bc-last-updated').textContent = `Dikemas kini: ${escapeHTML(latest.date)}${activeHeight > 50 ? ' • Tinggi: ' + activeHeight + ' cm' : ''}`;
+
+            ['weight', 'smm', 'bfp', 'bmi'].forEach(k => {
+                const t = getTrendIndicator(k, latest[k], prev?.[k]);
+                const el = document.getElementById(`delta-${k}`);
+                el.textContent = t.label;
+                el.style.color = t.cls === 'trend-good' ? 'var(--accent)' : (t.cls === 'trend-bad' ? 'var(--danger)' : 'var(--text-secondary)');
+                const b = getStatusBadge(k, latest[k]);
+                const bEl = document.getElementById(`badge-${k}`);
+                bEl.textContent = b.text;
+                bEl.className = `badge ${b.cls}`;
+            });
+
+            const bmiEval = getBmiEvaluation(latest.bmi, activeHeight, latest.weight);
+            const bmiDeltaEl = document.getElementById('delta-bmi');
+            if (bmiEval.bmi > 0) {
+                bmiDeltaEl.textContent = bmiEval.statusText;
+                bmiDeltaEl.style.color = bmiEval.isNormal ? 'var(--accent)' : (bmiEval.badgeCls === 'badge-bad' ? 'var(--danger)' : 'var(--amber)');
+            }
+
+            if (optInfoEl) {
+                if (bmiEval.optMin !== null && bmiEval.optMax !== null) {
+                    optInfoEl.innerHTML = `Optimum (${activeHeight}cm): <strong style="color:var(--accent);">${bmiEval.optMin}–${bmiEval.optMax} kg</strong>` +
+                        (bmiEval.targetDiffText && !bmiEval.isNormal ? `<br><span style="color:var(--amber);">${bmiEval.targetDiffText}</span>` : '');
+                } else {
+                    optInfoEl.textContent = 'Kemaskini tinggi (cm) untuk kira berat optimum';
+                }
+            }
+
+            const last3 = appState.bodyComps.slice(0, 3);
+            compCountBadge.textContent = `${last3.length} terakhir`;
+
+            last3Container.innerHTML = last3.map((item, idx) => {
+                const older = appState.bodyComps[idx + 1] || null;
+                const wT = getTrendIndicator('weight', item.weight, older?.weight);
+                const smmT = getTrendIndicator('smm', item.smm, older?.smm);
+                const bfpT = getTrendIndicator('bfp', item.bfp, older?.bfp);
+                const bmiT = getTrendIndicator('bmi', item.bmi, older?.bmi);
+                const tag = idx === 0 ? 'Terkini' : (idx === 1 ? 'Sesi -1' : 'Sesi -2');
+                const itemH = parseFloat(item.height) || activeHeight;
+                const itemEval = getBmiEvaluation(item.bmi, itemH, item.weight);
+
+                return `
+                    <div class="bc-comp-card">
+                        <div class="bc-comp-header">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="badge ${idx === 0 ? 'badge-good' : 'badge-neutral'}">${tag}</span>
+                                <strong>${escapeHTML(item.date)}</strong>
+                            </div>
+                            <span style="font-size:11px; color:var(--text-secondary);">${older ? 'vs ' + escapeHTML(older.date) : 'Awal'}</span>
+                        </div>
+                        <div class="bc-comp-grid">
+                            <div class="bc-comp-item">
+                                <div class="bc-comp-item-top"><span>BERAT</span><span class="trend-pill ${wT.cls}">${wT.label}</span></div>
+                                <div class="bc-comp-item-val">${item.weight} <span class="metric-unit">kg</span></div>
+                            </div>
+                            <div class="bc-comp-item">
+                                <div class="bc-comp-item-top"><span>SMM</span><span class="trend-pill ${smmT.cls}">${smmT.label}</span></div>
+                                <div class="bc-comp-item-val">${item.smm} <span class="metric-unit">kg</span></div>
+                            </div>
+                            <div class="bc-comp-item">
+                                <div class="bc-comp-item-top"><span>BFP</span><span class="trend-pill ${bfpT.cls}">${bfpT.label}</span></div>
+                                <div class="bc-comp-item-val">${item.bfp} <span class="metric-unit">%</span></div>
+                            </div>
+                            <div class="bc-comp-item">
+                                <div class="bc-comp-item-top"><span>BMI</span><span class="trend-pill ${bmiT.cls}">${bmiT.label}</span></div>
+                                <div class="bc-comp-item-val">${item.bmi} <span class="metric-unit" style="font-size:10px;">(${itemEval.isNormal ? 'Normal' : 'Tidak Normal'})</span></div>
+                            </div>
+                        </div>
+                        ${itemEval.optMin !== null ? `<div style="margin-top:6px; font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between;"><span>Tinggi: ${itemH} cm</span><span>Berat Optimum: <strong style="color:var(--accent);">${itemEval.optMin}–${itemEval.optMax} kg</strong></span></div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openBodyCompModal() {
+            document.getElementById('bc-input-date').value = getTodayISO();
+            document.getElementById('ai-scan-status').style.display = 'none';
+            const savedHeight = appState.settings.userHeightCm || appState.bodyComps[0]?.height || '';
+            document.getElementById('bc-input-height').value = savedHeight;
+
+            if (appState.bodyComps.length > 0) {
+                const last = appState.bodyComps[0];
+                document.getElementById('bc-input-weight').value = last.weight;
+                document.getElementById('bc-input-smm').value = last.smm;
+                document.getElementById('bc-input-bfp').value = last.bfp;
+                document.getElementById('bc-input-bmi').value = last.bmi;
+            }
+            handleBodyCompLiveCalc('init');
+            document.getElementById('modal-bc').classList.add('open');
+        }
+
+        function saveBodyCompForm(e) {
+            e.preventDefault();
+            const heightVal = parseFloat(document.getElementById('bc-input-height').value.replace(',', '.')) || 0;
+            const weightVal = parseFloat(document.getElementById('bc-input-weight').value.replace(',', '.')) || 0;
+            let bmiVal = parseFloat(document.getElementById('bc-input-bmi').value.replace(',', '.')) || 0;
+
+            if ((!bmiVal || bmiVal <= 0) && heightVal > 50 && weightVal > 0) {
+                const hM = heightVal / 100;
+                bmiVal = Math.round((weightVal / (hM * hM)) * 10) / 10;
+            }
+
+            if (heightVal > 50) {
+                appState.settings.userHeightCm = heightVal;
+            }
+
+            const entry = {
+                date: document.getElementById('bc-input-date').value,
+                height: heightVal,
+                weight: weightVal,
+                smm: parseFloat(document.getElementById('bc-input-smm').value.replace(',', '.')) || 0,
+                bfp: parseFloat(document.getElementById('bc-input-bfp').value.replace(',', '.')) || 0,
+                bmi: bmiVal
+            };
+            appState.bodyComps.unshift(entry);
+            saveState();
+            renderBodyCompSection();
+            renderHistoryAndLibrary();
+            closeModal('modal-bc');
+            showToast('Rekod timbangan disimpan!');
+        }
+
+        function deleteBodyComp(idx) {
+            askConfirm('Padam Rekod', 'Padam rekod timbangan ini?', () => {
+                appState.bodyComps.splice(idx, 1);
+                saveState();
+                renderBodyCompSection();
+                renderHistoryAndLibrary();
+                showToast('Rekod dipadam');
+            });
+        }
+
+        function loadTesseractScript() {
+            return new Promise((resolve, reject) => {
+                if (window.Tesseract) return resolve(window.Tesseract);
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+                s.onload = () => resolve(window.Tesseract);
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+
+        function parseScaleText(text) {
+            const clean = text.replace(/,/g, '.');
+            const findNum = (patterns) => {
+                for (const p of patterns) {
+                    const m = clean.match(p);
+                    if (m && m[1]) {
+                        const val = parseFloat(m[1]);
+                        if (!isNaN(val) && val > 0) return val;
+                    }
+                }
+                return null;
+            };
+            return {
+                weight: findNum([/(?:weight|berat|wt)[^\d]{0,15}(\d{2,3}(?:\.\d{1,2})?)/i, /(\d{2,3}\.\d{1,2})\s*kg/i]),
+                smm: findNum([/(?:smm|skeletal\s*muscle|muscle\s*mass|otot)[^\d]{0,15}(\d{2}(?:\.\d{1,2})?)/i]),
+                bfp: findNum([/(?:bfp|body\s*fat|fat\s*rate|lemak|pbf)[^\d]{0,15}(\d{1,2}(?:\.\d{1,2})?)/i, /(\d{1,2}\.\d{1,2})\s*%/]),
+                bmi: findNum([/(?:bmi|body\s*mass\s*index)[^\d]{0,15}(\d{2}(?:\.\d{1,2})?)/i])
+            };
+        }
+
+        function compressImageFile(file, maxDim = 1024, quality = 0.8) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) {
+                                h = Math.round((h * maxDim) / w);
+                                w = maxDim;
+                            } else {
+                                w = Math.round((w * maxDim) / h);
+                                h = maxDim;
+                            }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        const base64 = dataUrl.split(',')[1];
+                        const sizeKb = Math.round((base64.length * 3) / 4 / 1024);
+                        resolve({ base64, mimeType: 'image/jpeg', dataUrl, sizeKb });
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function scanScaleScreenshot(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById('ai-scan-status');
+            statusEl.style.display = 'block';
+
+            const decryptedKey = await decryptStoredApiKey();
+
+            if (decryptedKey) {
+                statusEl.textContent = '⏳ Gemini Vision sedang menganalisis gambar timbangan...';
+                try {
+                    const compressed = await compressImageFile(file, 1024, 0.85);
+                    const data = await callGeminiWithFallback(decryptedKey, {
+                        contents: [{
+                            parts: [
+                                { text: 'Extract numeric values for weight (kg), smm (kg), bfp (%), and bmi from this smart scale / InBody screenshot. Return strict JSON only: {"weight":0,"smm":0,"bfp":0,"bmi":0}' },
+                                { inlineData: { mimeType: compressed.mimeType, data: compressed.base64 } }
+                            ]
+                        }],
+                        generationConfig: { responseMimeType: 'application/json' }
+                    });
+                    if (data?.error) {
+                        statusEl.textContent = `⚠️ Ralat API: ${data.error.message || 'Semak kunci API anda.'}`;
+                        return;
+                    }
+                    const parsed = JSON.parse(data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+                    if (parsed.weight) document.getElementById('bc-input-weight').value = parsed.weight;
+                    if (parsed.smm) document.getElementById('bc-input-smm').value = parsed.smm;
+                    if (parsed.bfp) document.getElementById('bc-input-bfp').value = parsed.bfp;
+                    if (parsed.bmi) {
+                        document.getElementById('bc-input-bmi').value = parsed.bmi;
+                        handleBodyCompLiveCalc('bmi');
+                    } else {
+                        handleBodyCompLiveCalc('weight');
+                    }
+                    statusEl.textContent = '✅ Berjaya dibaca dengan Gemini Vision! Sila semak & simpan.';
+                    return;
+                } catch (err) {
+                    statusEl.textContent = '⚠️ Ralat bacaan AI. Sila isi secara manual di bawah.';
+                    return;
+                }
+            }
+
+            statusEl.textContent = '⏳ Membaca teks gambar secara tempatan (OCR)...';
+            try {
+                const Tesseract = await loadTesseractScript();
+                const result = await Tesseract.recognize(file, 'eng');
+                const extracted = parseScaleText(result.data.text || '');
+                let foundAny = false;
+
+                if (extracted.weight) { document.getElementById('bc-input-weight').value = extracted.weight; foundAny = true; }
+                if (extracted.smm) { document.getElementById('bc-input-smm').value = extracted.smm; foundAny = true; }
+                if (extracted.bfp) { document.getElementById('bc-input-bfp').value = extracted.bfp; foundAny = true; }
+                if (extracted.bmi) {
+                    document.getElementById('bc-input-bmi').value = extracted.bmi;
+                    foundAny = true;
+                    handleBodyCompLiveCalc('bmi');
+                } else if (extracted.weight) {
+                    handleBodyCompLiveCalc('weight');
+                }
+
+                statusEl.textContent = foundAny
+                    ? '✅ Indikator dikesan! Semak nombor di bawah (atau aktifkan Gemini AI di Tetapan).'
+                    : '⚠️ Nombor kurang jelas. Sila isi manual atau aktifkan Gemini AI di Tetapan.';
+            } catch (err) {
+                statusEl.textContent = '⚠️ Tidak dapat memproses gambar. Sila isi secara manual di bawah.';
+            }
+        }
+
+        // ==========================================
+        // 5. NUTRITION TAB, CAMERA/GALLERY & 5-DAY CUMULATIVE
+        // ==========================================
+        async function handleMealPhotoSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById('meal-ai-status');
+            statusEl.style.display = 'block';
+            statusEl.textContent = '⏳ Memproses & memampatkan gambar makanan...';
+
+            try {
+                const compressed = await compressImageFile(file, 1024, 0.8);
+                pendingMealPhoto = compressed;
+
+                const previewBox = document.getElementById('meal-photo-preview-box');
+                const previewImg = document.getElementById('meal-photo-preview-img');
+                const metaEl = document.getElementById('meal-photo-meta');
+
+                previewImg.src = compressed.dataUrl;
+                metaEl.textContent = `${file.name || 'Foto Makanan'} (~${compressed.sizeKb} KB)`;
+                previewBox.style.display = 'flex';
+                statusEl.textContent = '📸 Gambar dilampirkan! Tekan "✨ AI Anggar Makro (Teks / Gambar)" untuk imbas.';
+            } catch (err) {
+                statusEl.textContent = '⚠️ Gagal memuatkan gambar. Sila cuba lagi.';
+            }
+        }
+
+        function clearMealPhoto() {
+            pendingMealPhoto = null;
+            const camInput = document.getElementById('meal-camera-input');
+            const galInput = document.getElementById('meal-gallery-input');
+            const previewBox = document.getElementById('meal-photo-preview-box');
+            const previewImg = document.getElementById('meal-photo-preview-img');
+            if (camInput) camInput.value = '';
+            if (galInput) galInput.value = '';
+            if (previewImg) previewImg.src = '';
+            if (previewBox) previewBox.style.display = 'none';
+        }
+
+        function changeNutritionDate(newDate) {
+            if (!newDate) return;
+            selectedNutriDate = newDate;
+            renderNutritionTab();
+        }
+
+        function renderNutritionTab() {
+            document.getElementById('nutri-date-select').value = selectedNutriDate;
+            document.getElementById('meals-date-label').textContent = selectedNutriDate === getTodayISO() ? 'Hari Ini' : selectedNutriDate;
+
+            const targets = appState.nutrition.targets;
+            const dayMeals = appState.nutrition.meals.filter(m => m.date === selectedNutriDate);
+
+            let sumCal = 0, sumPro = 0, sumCarb = 0, sumFat = 0;
+            dayMeals.forEach(m => {
+                sumCal += m.calories || 0;
+                sumPro += m.protein || 0;
+                sumCarb += m.carbs || 0;
+                sumFat += m.fat || 0;
+            });
+
+            sumCal = Math.round(sumCal);
+            sumPro = Math.round(sumPro);
+            sumCarb = Math.round(sumCarb);
+            sumFat = Math.round(sumFat);
+
+            const calPct = targets.calories > 0 ? Math.min(100, Math.round((sumCal / targets.calories) * 100)) : 0;
+            const proPct = targets.protein > 0 ? Math.min(100, Math.round((sumPro / targets.protein) * 100)) : 0;
+            const carbPct = targets.carbs > 0 ? Math.min(100, Math.round((sumCarb / targets.carbs) * 100)) : 0;
+            const fatPct = targets.fat > 0 ? Math.min(100, Math.round((sumFat / targets.fat) * 100)) : 0;
+
+            document.getElementById('nutri-cal-curr').textContent = sumCal;
+            document.getElementById('nutri-cal-target').textContent = targets.calories;
+            document.getElementById('nutri-cal-pct').textContent = `${calPct}%`;
+            document.getElementById('nutri-cal-bar').style.width = `${calPct}%`;
+
+            const remCal = targets.calories - sumCal;
+            const remEl = document.getElementById('nutri-cal-rem');
+            if (remCal >= 0) {
+                remEl.textContent = `Baki: ${remCal} kcal`;
+                remEl.style.color = 'var(--accent)';
+            } else {
+                remEl.textContent = `Lebih: +${Math.abs(remCal)} kcal`;
+                remEl.style.color = 'var(--amber)';
+            }
+
+            document.getElementById('nutri-pro-curr').textContent = sumPro;
+            document.getElementById('nutri-pro-target').textContent = targets.protein;
+            document.getElementById('nutri-pro-bar').style.width = `${proPct}%`;
+
+            document.getElementById('nutri-carb-curr').textContent = sumCarb;
+            document.getElementById('nutri-carb-target').textContent = targets.carbs;
+            document.getElementById('nutri-carb-bar').style.width = `${carbPct}%`;
+
+            document.getElementById('nutri-fat-curr').textContent = sumFat;
+            document.getElementById('nutri-fat-target').textContent = targets.fat;
+            document.getElementById('nutri-fat-bar').style.width = `${fatPct}%`;
+
+            const currWater = appState.nutrition.waterByDate[selectedNutriDate] || 0;
+            const targetWater = targets.water || 3000;
+            const waterPct = targetWater > 0 ? Math.min(100, Math.round((currWater / targetWater) * 100)) : 0;
+            document.getElementById('water-curr-disp').textContent = currWater;
+            document.getElementById('water-target-disp').textContent = targetWater;
+            document.getElementById('water-pct-badge').textContent = `${waterPct}%`;
+            document.getElementById('water-bar').style.width = `${waterPct}%`;
+
+            document.getElementById('meals-count-sub').textContent = `${dayMeals.length} hidangan direkodkan`;
+            const listEl = document.getElementById('meals-list-container');
+            listEl.innerHTML = dayMeals.length ? dayMeals.map(m => `
+                <div class="list-item">
+                    <div style="min-width:0;">
+                        <div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(m.name)}</div>
+                        <div class="card-sub"><strong>${m.calories} kcal</strong> • P: ${m.protein}g • C: ${m.carbs}g • F: ${m.fat}g</div>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteMealEntry('${escapeHTML(m.id)}')">Padam</button>
+                </div>
+            `).join('') : '<div class="card-sub">Tiada hidangan direkodkan pada tarikh ini.</div>';
+
+            renderLast5DaysNutrition();
+        }
+
+        function getLast5ConsecutiveDates(anchorIso) {
+            const dates = [];
+            const base = new Date(anchorIso + 'T12:00:00');
+            for (let i = 0; i < 5; i++) {
+                const d = new Date(base);
+                d.setDate(base.getDate() - i);
+                dates.push(d.toISOString().split('T')[0]);
+            }
+            return dates;
+        }
+
+        function renderLast5DaysNutrition() {
+            const container = document.getElementById('nutri-last5-container');
+            const avgBadge = document.getElementById('nutri-5day-avg');
+            if (!container) return;
+
+            const targets = appState.nutrition.targets;
+            const todayIso = getTodayISO();
+            const dates = getLast5ConsecutiveDates(selectedNutriDate || todayIso);
+
+            let activeDaysCount = 0;
+            let total5DayCalories = 0;
+
+            const cardsHtml = dates.map(dateStr => {
+                const mealsForDay = appState.nutrition.meals.filter(m => m.date === dateStr);
+                const waterForDay = appState.nutrition.waterByDate[dateStr] || 0;
+
+                let cals = 0, pro = 0, carbs = 0, fat = 0;
+                mealsForDay.forEach(m => {
+                    cals += m.calories || 0;
+                    pro += m.protein || 0;
+                    carbs += m.carbs || 0;
+                    fat += m.fat || 0;
+                });
+
+                cals = Math.round(cals);
+                pro = Math.round(pro);
+                carbs = Math.round(carbs);
+                fat = Math.round(fat);
+
+                if (cals > 0) {
+                    activeDaysCount++;
+                    total5DayCalories += cals;
+                }
+
+                const calPct = targets.calories > 0 ? Math.min(100, Math.round((cals / targets.calories) * 100)) : 0;
+                const isSelected = dateStr === selectedNutriDate;
+                const dateObj = new Date(dateStr + 'T12:00:00');
+                const shortLabel = dateStr === todayIso
+                    ? 'Hari Ini'
+                    : dateObj.toLocaleDateString('ms-MY', { weekday: 'short', day: 'numeric', month: 'short' });
+
+                let statusText = 'Tiada Rekod';
+                let statusCls = 'badge-neutral';
+                let barColor = 'var(--border)';
+
+                if (cals > 0) {
+                    const ratio = cals / (targets.calories || 2400);
+                    if (ratio >= 0.9 && ratio <= 1.1) {
+                        statusText = 'Capai Target';
+                        statusCls = 'badge-good';
+                        barColor = 'var(--accent)';
+                    } else if (ratio < 0.9) {
+                        statusText = 'Defisit';
+                        statusCls = 'badge-blue';
+                        barColor = 'var(--blue)';
+                    } else {
+                        statusText = 'Surplus';
+                        statusCls = 'badge-warn';
+                        barColor = 'var(--amber)';
+                    }
+                }
+
+                return `
+                    <div class="bc-comp-card" onclick="changeNutritionDate('${dateStr}')" style="margin-bottom:0; cursor:pointer; border-color:${isSelected ? 'var(--accent)' : 'var(--border)'};">
+                        <div class="bc-comp-header" style="margin-bottom:6px; padding-bottom:5px;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <strong>${escapeHTML(shortLabel)}</strong>
+                                <span style="font-size:11px; color:var(--text-secondary);">${escapeHTML(dateStr)}</span>
+                            </div>
+                            <span class="badge ${statusCls}">${statusText}</span>
+                        </div>
+                        <div style="display:flex; align-items:baseline; justify-content:space-between; font-size:13px;">
+                            <div><strong>${cals}</strong> <span class="metric-unit">/ ${targets.calories} kcal (${calPct}%)</span></div>
+                            <div style="font-size:11px; color:var(--blue); font-weight:700;">💧 ${waterForDay} ml</div>
+                        </div>
+                        <div class="progress-track" style="height:6px; margin:6px 0 8px;">
+                            <div class="progress-fill" style="width:${calPct}%; background:${barColor};"></div>
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px; color:var(--text-secondary);">
+                            <span class="tag-pill" style="margin:0;">P: <strong>${pro}g</strong>/${targets.protein}g</span>
+                            <span class="tag-pill" style="margin:0;">C: <strong>${carbs}g</strong>/${targets.carbs}g</span>
+                            <span class="tag-pill" style="margin:0;">F: <strong>${fat}g</strong>/${targets.fat}g</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const avgKcal = activeDaysCount > 0 ? Math.round(total5DayCalories / activeDaysCount) : 0;
+            avgBadge.textContent = `Purata: ${avgKcal} kcal`;
+            container.innerHTML = cardsHtml;
+        }
+
+        function addWater(ml) {
+            const curr = appState.nutrition.waterByDate[selectedNutriDate] || 0;
+            appState.nutrition.waterByDate[selectedNutriDate] = curr + ml;
+            saveState();
+            renderNutritionTab();
+            showToast(`+${ml} ml air ditambah!`);
+        }
+
+        function resetWaterToday() {
+            appState.nutrition.waterByDate[selectedNutriDate] = 0;
+            saveState();
+            renderNutritionTab();
+            showToast('Log air ditetapkan semula.');
+        }
+
+        function saveMealEntry(e) {
+            e.preventDefault();
+            const rawName = document.getElementById('meal-name-input').value.trim();
+            const name = rawName || (pendingMealPhoto ? 'Hidangan Bergambar' : '');
+            const calories = parseFloat(document.getElementById('meal-cal-input').value.replace(',', '.')) || 0;
+            const protein = parseFloat(document.getElementById('meal-pro-input').value.replace(',', '.')) || 0;
+            const carbs = parseFloat(document.getElementById('meal-carb-input').value.replace(',', '.')) || 0;
+            const fat = parseFloat(document.getElementById('meal-fat-input').value.replace(',', '.')) || 0;
+
+            if (!name) {
+                showToast('Sila isi nama makanan atau lampirkan gambar.');
+                document.getElementById('meal-name-input').focus();
+                return;
+            }
+
+            appState.nutrition.meals.unshift({
+                id: 'meal_' + Date.now(),
+                date: selectedNutriDate,
+                name,
+                calories,
+                protein,
+                carbs,
+                fat
+            });
+
+            document.getElementById('meal-name-input').value = '';
+            document.getElementById('meal-cal-input').value = '';
+            document.getElementById('meal-pro-input').value = '';
+            document.getElementById('meal-carb-input').value = '';
+            document.getElementById('meal-fat-input').value = '';
+            document.getElementById('meal-ai-status').style.display = 'none';
+            clearMealPhoto();
+
+            saveState();
+            renderNutritionTab();
+            showToast('Hidangan berjaya disimpan!');
+        }
+
+        function deleteMealEntry(id) {
+            appState.nutrition.meals = appState.nutrition.meals.filter(m => m.id !== id);
+            saveState();
+            renderNutritionTab();
+            showToast('Hidangan dipadam.');
+        }
+
+        function resetMealsForSelectedDate() {
+            askConfirm('Reset Hidangan', `Padam semua hidangan yang direkodkan pada ${selectedNutriDate}?`, () => {
+                appState.nutrition.meals = appState.nutrition.meals.filter(m => m.date !== selectedNutriDate);
+                saveState();
+                renderNutritionTab();
+                showToast('Semua hidangan tarikh ini telah dipadam.');
+            });
+        }
+
+        async function estimateMealWithGemini() {
+            const foodDesc = document.getElementById('meal-name-input').value.trim();
+            const hasPhoto = Boolean(pendingMealPhoto && pendingMealPhoto.base64);
+
+            if (!foodDesc && !hasPhoto) {
+                showToast('Sila tulis nama makanan atau ambil/pilih gambar dahulu.');
+                document.getElementById('meal-name-input').focus();
+                return;
+            }
+
+            const now = Date.now();
+            if (now - lastAiCallTimestamp < 4000) {
+                showToast('Sila tunggu beberapa saat sebelum mencuba lagi.');
+                return;
+            }
+
+            const decryptedKey = await decryptStoredApiKey();
+            const statusEl = document.getElementById('meal-ai-status');
+
+            if (!decryptedKey) {
+                if (hasPhoto) {
+                    statusEl.style.display = 'block';
+                    statusEl.textContent = '🔒 Sila aktifkan Integrasi Gemini AI & masukkan Kunci API di tab Tetapan untuk imbas gambar makanan.';
+                    showToast('Kunci API diperlukan untuk analisis gambar AI.');
+                    return;
+                }
+                const promptText = `Anggarkan nilai nutrisi (Kalori kcal, Protein g, Karbohidrat g, Lemak g) untuk hidangan ini: "${foodDesc}"`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(promptText).catch(() => {});
+                    showToast('Prompt anggaran makro disalin! Tampal dalam App Gemini.');
+                }
+                window.open('https://gemini.google.com/app', '_blank', 'noopener,noreferrer');
+                return;
+            }
+
+            lastAiCallTimestamp = now;
+            statusEl.style.display = 'block';
+            statusEl.textContent = hasPhoto
+                ? '⏳ Gemini Vision sedang menganalisis gambar hidangan & label nutrisi...'
+                : '⏳ Gemini AI sedang mengira anggaran makro...';
+
+            try {
+                const parts = [];
+                if (hasPhoto) {
+                    const contextNote = foodDesc ? ` Additional user note: "${foodDesc}".` : '';
+                    parts.push({
+                        text: `Identify the food, portion size, or nutrition facts label in this image.${contextNote} Provide a realistic food name in Bahasa Melayu (short & clear) and estimate total nutrition macros (calories in kcal, protein in g, carbs in g, fat in g). Return strict JSON only: {"name":"","calories":0,"protein":0,"carbs":0,"fat":0}`
+                    });
+                    parts.push({
+                        inlineData: {
+                            mimeType: pendingMealPhoto.mimeType,
+                            data: pendingMealPhoto.base64
+                        }
+                    });
+                } else {
+                    parts.push({
+                        text: `Estimate realistic nutrition macros (calories in kcal, protein in g, carbs in g, fat in g) for this food/meal: "${foodDesc}". Return strict JSON only: {"name":"${foodDesc}","calories":0,"protein":0,"carbs":0,"fat":0}`
+                    });
+                }
+
+                const data = await callGeminiWithFallback(decryptedKey, {
+                    contents: [{ parts }],
+                    generationConfig: { responseMimeType: 'application/json' }
+                });
+
+                if (data?.error) {
+                    statusEl.textContent = `⚠️ Ralat API: ${data.error.message || 'Sila semak kunci API anda di Tetapan.'}`;
+                    return;
+                }
+
+                const parsed = JSON.parse(data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+
+                if (parsed.name && (!foodDesc || hasPhoto)) {
+                    document.getElementById('meal-name-input').value = foodDesc
+                        ? `${parsed.name} (${foodDesc})`
+                        : parsed.name;
+                }
+                if (parsed.calories !== undefined) document.getElementById('meal-cal-input').value = Math.round(parsed.calories);
+                if (parsed.protein !== undefined) document.getElementById('meal-pro-input').value = Math.round(parsed.protein);
+                if (parsed.carbs !== undefined) document.getElementById('meal-carb-input').value = Math.round(parsed.carbs);
+                if (parsed.fat !== undefined) document.getElementById('meal-fat-input').value = Math.round(parsed.fat);
+
+                statusEl.textContent = '✅ Anggaran makro diisi! Semak dan tekan "+ Simpan Hidangan".';
+            } catch (e) {
+                statusEl.textContent = '⚠️ Gagal mendapatkan anggaran AI. Sila isi secara manual.';
+            }
+        }
+
+        function openSmartAutoTargetModal() {
+            const latestWeight = appState.bodyComps[0]?.weight || 70;
+            document.getElementById('auto-target-weight-ref').textContent = `${latestWeight} kg`;
+            document.getElementById('modal-auto-target').classList.add('open');
+        }
+
+        function applySmartAutoTarget(e) {
+            e.preventDefault();
+            const weight = appState.bodyComps[0]?.weight || 70;
+            const goal = document.getElementById('auto-target-goal').value;
+
+            let kcalPerKg = 31;
+            let proPerKg = 2.0;
+            if (goal === 'cutting') { kcalPerKg = 26; proPerKg = 2.2; }
+            if (goal === 'bulking') { kcalPerKg = 36; proPerKg = 2.0; }
+
+            const calories = Math.round(weight * kcalPerKg);
+            const protein = Math.round(weight * proPerKg);
+            const fat = Math.round((calories * 0.25) / 9);
+            const carbs = Math.max(50, Math.round((calories - (protein * 4 + fat * 9)) / 4));
+            const water = Math.round(weight * 40);
+
+            appState.nutrition.targets = { calories, protein, carbs, fat, water };
+            saveState();
+            closeModal('modal-auto-target');
+            renderNutritionTab();
+            showToast(`Sasaran pintar dikemas kini (${calories} kcal, ${protein}g Protein)!`);
+        }
+
+        function openMacroTargetModal() {
+            const t = appState.nutrition.targets;
+            document.getElementById('target-cal-input').value = t.calories;
+            document.getElementById('target-pro-input').value = t.protein;
+            document.getElementById('target-carb-input').value = t.carbs;
+            document.getElementById('target-fat-input').value = t.fat;
+            document.getElementById('target-water-input').value = t.water || 3000;
+            document.getElementById('modal-macro-targets').classList.add('open');
+        }
+
+        function saveManualMacroTargets(e) {
+            e.preventDefault();
+            appState.nutrition.targets = {
+                calories: parseInt(document.getElementById('target-cal-input').value, 10) || 2400,
+                protein: parseInt(document.getElementById('target-pro-input').value, 10) || 160,
+                carbs: parseInt(document.getElementById('target-carb-input').value, 10) || 260,
+                fat: parseInt(document.getElementById('target-fat-input').value, 10) || 70,
+                water: parseInt(document.getElementById('target-water-input').value, 10) || 3000
+            };
+            saveState();
+            closeModal('modal-macro-targets');
+            renderNutritionTab();
+            showToast('Sasaran makro disimpan!');
+        }
+
+        // ==========================================
+        // 6. ASK GEMINI (JURULATIH AI ON HOME)
+        // ==========================================
+        function fillGeminiPrompt(text) {
+            const box = document.getElementById('ask-gemini-input');
+            box.value = text;
+            box.focus();
+        }
+
+        function openInGeminiApp() {
+            const prompt = document.getElementById('ask-gemini-input').value.trim();
+            if (prompt && navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(prompt).catch(() => {});
+                showToast('Soalan disalin! Tampal (Paste) dalam Gemini.');
+            }
+            window.open('https://gemini.google.com/app', '_blank', 'noopener,noreferrer');
+        }
+
+        async function askGeminiInApp() {
+            const prompt = document.getElementById('ask-gemini-input').value.trim();
+            if (!prompt) {
+                showToast('Sila taip soalan dahulu.');
+                return;
+            }
+
+            const now = Date.now();
+            if (now - lastAiCallTimestamp < 4000) {
+                showToast('Sila tunggu beberapa saat sebelum soalan seterusnya.');
+                return;
+            }
+
+            const decryptedKey = await decryptStoredApiKey();
+            const replyBox = document.getElementById('ask-gemini-reply');
+
+            if (!decryptedKey) {
+                replyBox.style.display = 'block';
+                replyBox.textContent = '💡 Anda belum menyambungkan Kunci API di Tetapan. Soalan anda telah disalin—tekan "App Gemini ↗" untuk terus bertanya di aplikasi Gemini telefon anda!';
+                openInGeminiApp();
+                return;
+            }
+
+            lastAiCallTimestamp = now;
+            replyBox.style.display = 'block';
+            replyBox.textContent = '⏳ Gemini sedang menaip jawapan...';
+
+            try {
+                const data = await callGeminiWithFallback(decryptedKey, {
+                    contents: [{
+                        parts: [{ text: `Anda adalah jurulatih kecergasan, bina badan, dan pakar pemakanan berpengalaman. Jawab soalan ini dalam Bahasa Melayu yang ringkas, selamat, dan praktikal:\n\n${prompt}` }]
+                    }]
+                });
+                if (data?.error) {
+                    replyBox.textContent = `⚠️ Ralat API: ${data.error.message || 'Sila semak kunci API anda di Tetapan.'}`;
+                    return;
+                }
+                const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                replyBox.textContent = answer || 'Tiada jawapan diterima. Cuba buka terus di App Gemini.';
+            } catch (e) {
+                replyBox.textContent = '⚠️ Ralat sambungan internet. Cuba tekan "App Gemini ↗".';
+            }
+        }
+
+        // ==========================================
+        // 7. WORKOUT LOGGER (PROGRESSIVE OVERLOAD)
+        // ==========================================
+        function updateWorkoutTitle(val) {
+            appState.activeWorkout.title = val;
+            saveState();
+        }
+
+        function getPreviousSets(exerciseId) {
+            for (let i = 0; i < appState.workouts.length; i++) {
+                const found = appState.workouts[i].exercises.find(e => e.exerciseId === exerciseId);
+                if (found && found.sets?.length) return found.sets;
+            }
+            return null;
+        }
+
+        function getPreviousSessionStats(exerciseId) {
+            const prevSets = getPreviousSets(exerciseId);
+            if (!prevSets) return null;
+            let maxWeight = 0, maxWeightReps = 0, maxReps = 0;
+            prevSets.forEach(s => {
+                const w = parseFloat(s.weight) || 0;
+                const r = parseInt(s.reps, 10) || 0;
+                if (w > maxWeight || (w === maxWeight && r > maxWeightReps)) {
+                    maxWeight = w;
+                    maxWeightReps = r;
+                }
+                if (r > maxReps) maxReps = r;
+            });
+            return { sets: prevSets, setCount: prevSets.length, maxWeight, maxWeightReps, maxReps };
+        }
+
+        function computeOverloadText(exerciseId, setIdx, weightVal, repsVal) {
+            const w = parseFloat(weightVal);
+            const r = parseInt(repsVal, 10);
+            if ((isNaN(w) && isNaN(r)) || ((w === 0 || isNaN(w)) && (r === 0 || isNaN(r)))) {
+                return { text: '', cls: 'overload-eq' };
+            }
+            const currW = isNaN(w) ? 0 : w;
+            const currR = isNaN(r) ? 0 : r;
+            const prevSets = getPreviousSets(exerciseId);
+            if (!prevSets) return { text: '✨ Rekod set baru', cls: 'overload-up' };
+
+            const prev = prevSets[setIdx] || prevSets[prevSets.length - 1];
+            const prevW = parseFloat(prev.weight) || 0;
+            const prevR = parseInt(prev.reps, 10) || 0;
+            const diffW = Math.round((currW - prevW) * 100) / 100;
+            const diffR = currR - prevR;
+
+            if (diffW < 0) return { text: `⚠️ Berat kurang ${diffW}kg vs ${prevW}kg×${prevR}`, cls: 'overload-bad' };
+            if (diffW === 0 && diffR < 0) return { text: `⚠️ Rep kurang ${diffR} vs ${prevW}kg×${prevR}`, cls: 'overload-warn' };
+            if (diffW > 0 || diffR > 0) {
+                const parts = [];
+                if (diffW > 0) parts.push(`+${diffW}kg`);
+                if (diffR > 0) parts.push(`+${diffR} rep`);
+                return { text: `🚀 Overload! (${parts.join(', ')}) vs ${prevW}kg×${prevR}`, cls: 'overload-up' };
+            }
+            return { text: `= Sama seperti sesi lepas (${prevW}kg×${prevR})`, cls: 'overload-eq' };
+        }
+
+        function getSetCountWarningText(exerciseId, currentSets) {
+            const prevStats = getPreviousSessionStats(exerciseId);
+            if (!prevStats) return null;
+            if (currentSets.length < prevStats.setCount) {
+                return `⚠️ Set kurang dari sesi lepas: ${currentSets.length}/${prevStats.setCount} set`;
+            }
+            return null;
+        }
+
+        function renderActiveWorkout() {
+            document.getElementById('workout-title-input').value = appState.activeWorkout.title;
+            const container = document.getElementById('active-exercises-list');
+
+            if (!appState.activeWorkout.exercises.length) {
+                container.innerHTML = `
+                    <div class="card" style="text-align:center; padding: 26px 16px;">
+                        <div style="font-size: 15px; font-weight: 700; margin-bottom: 6px;">Tiada Senaman Lagi</div>
+                        <div class="card-sub">Tekan "+ Tambah Senaman" di bawah untuk mula merekod beban, rep dan set.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = appState.activeWorkout.exercises.map((exItem, exIdx) => {
+                const meta = appState.exercises.find(e => e.id === exItem.exerciseId) || { name: 'Senaman', muscle: '' };
+                const prevStats = getPreviousSessionStats(exItem.exerciseId);
+                const prevSummary = prevStats ? prevStats.sets.map(s => `${s.weight}kg×${s.reps}`).join(' | ') : 'Tiada rekod lepas';
+                const maxBadge = prevStats
+                    ? `<span class="max-pill">🏆 Sesi Lepas Max: ${prevStats.maxWeight}kg × ${prevStats.maxWeightReps} rep (${prevStats.setCount} Set)</span>`
+                    : `<span class="badge badge-neutral">Sesi Pertama</span>`;
+                const setWarn = getSetCountWarningText(exItem.exerciseId, exItem.sets);
+                const copySessionBtn = prevStats
+                    ? `<button type="button" class="btn btn-blue btn-sm" style="min-height:28px; padding:4px 8px; font-size:11px;" onclick="copyLastSessionSets(${exIdx})">📋 Salin Sesi Lepas</button>`
+                    : '';
+
+                return `
+                    <div class="exercise-block">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 8px;">
+                            <div>
+                                <div style="font-size:16px; font-weight:800; margin-bottom: 4px;">${escapeHTML(meta.name)}</div>
+                                <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+                                    <span class="badge badge-good">${escapeHTML(meta.muscle)}</span>
+                                    ${maxBadge}
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeExercise(${exIdx})">Buang</button>
+                        </div>
+
+                        <div class="max-benchmark-box">
+                            <div style="min-width:0; flex:1;">
+                                <span style="color:var(--text-secondary);">Set Lepas:</span> <strong>${prevSummary}</strong>
+                            </div>
+                            ${copySessionBtn}
+                        </div>
+
+                        <div id="set-warn-${exIdx}" class="set-count-warning" style="display: ${setWarn ? 'flex' : 'none'};">
+                            ${setWarn || ''}
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            ${exItem.sets.map((setObj, setIdx) => {
+                                const status = computeOverloadText(exItem.exerciseId, setIdx, setObj.weight, setObj.reps);
+                                const canCopyPrev = setIdx > 0 || Boolean(prevStats && prevStats.sets.length > 0);
+                                const copyLabel = setIdx > 0 ? `📋 Copy #${setIdx}` : '📋 Copy Lepas';
+                                const copySetBtn = canCopyPrev
+                                    ? `<button type="button" class="btn btn-blue btn-sm" onclick="copyLastSet(${exIdx}, ${setIdx})">${copyLabel}</button>`
+                                    : '';
+
+                                return `
+                                    <div class="set-card">
+                                        <div class="set-header">
+                                            <span style="font-size:12px; font-weight:800; color:var(--text-secondary);">SET #${setIdx + 1}</span>
+                                            <div style="display:flex; align-items:center; gap:6px;">
+                                                ${copySetBtn}
+                                                <button type="button" class="btn btn-primary btn-sm" onclick="markSetDone(${exIdx}, ${setIdx})">✓ Selesai</button>
+                                                <button type="button" class="btn btn-secondary btn-sm" onclick="removeSet(${exIdx}, ${setIdx})">✕</button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div style="font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">BEBAN (KG)</div>
+                                            <div class="stepper-controls">
+                                                <button type="button" class="step-btn" onclick="stepSetField(${exIdx}, ${setIdx}, 'weight', -2.5)">-2.5</button>
+                                                <button type="button" class="step-btn" onclick="stepSetField(${exIdx}, ${setIdx}, 'weight', -1)">-1</button>
+                                                <input type="text" inputmode="decimal" class="num-input" id="inp-w-${exIdx}-${setIdx}" value="${escapeHTML(String(setObj.weight))}" placeholder="0" oninput="handleDirectInput(${exIdx}, ${setIdx}, 'weight', this.value)">
+                                                <button type="button" class="step-btn" onclick="stepSetField(${exIdx}, ${setIdx}, 'weight', 1)">+1</button>
+                                                <button type="button" class="step-btn" onclick="stepSetField(${exIdx}, ${setIdx}, 'weight', 2.5)">+2.5</button>
+                                                <button type="button" class="step-btn" onclick="stepSetField(${exIdx}, ${setIdx}, 'weight', 5)">+5</button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div style="font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">ULANGAN (REP)</div>
+                                            <div class="stepper-controls">
+                                                <button type="button" class="step-btn" onclick="stepSetField(${exIdx}, ${setIdx}, 'reps', -1)">-1</button>
+                                                <input type="text" inputmode="numeric" class="num-input" id="inp-r-${exIdx}-${setIdx}" value="${escapeHTML(String(setObj.reps))}" placeholder="0" oninput="handleDirectInput(${exIdx}, ${setIdx}, 'reps', this.value)">
+                                                <button type="button" class="step-btn" onclick="stepSetField(${exIdx}, ${setIdx}, 'reps', 1)">+1</button>
+                                            </div>
+                                        </div>
+
+                                        <div id="ovl-${exIdx}-${setIdx}" class="overload-status ${status.cls}">${status.text}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        <button type="button" class="btn btn-secondary btn-full" onclick="addSet(${exIdx})">+ Tambah Set (Auto-Copy)</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function copyLastSet(exIdx, setIdx) {
+            const exItem = appState.activeWorkout.exercises[exIdx];
+            if (!exItem) return;
+
+            if (setIdx > 0) {
+                const prevSet = exItem.sets[setIdx - 1];
+                exItem.sets[setIdx].weight = String(prevSet.weight || '');
+                exItem.sets[setIdx].reps = String(prevSet.reps || '');
+                saveState();
+                renderActiveWorkout();
+                showToast(`Set #${setIdx} disalin ke Set #${setIdx + 1}!`);
+                return;
+            }
+
+            const prevSets = getPreviousSets(exItem.exerciseId);
+            if (prevSets && prevSets.length > 0) {
+                exItem.sets[0].weight = String(prevSets[0].weight || '');
+                exItem.sets[0].reps = String(prevSets[0].reps || '');
+                saveState();
+                renderActiveWorkout();
+                showToast('Set #1 sesi lepas disalin!');
+            }
+        }
+
+        function copyLastSessionSets(exIdx) {
+            const exItem = appState.activeWorkout.exercises[exIdx];
+            if (!exItem) return;
+            const prevSets = getPreviousSets(exItem.exerciseId);
+            if (!prevSets || !prevSets.length) {
+                showToast('Tiada rekod sesi lepas untuk senaman ini.');
+                return;
+            }
+            exItem.sets = prevSets.map(s => ({
+                weight: String(s.weight || ''),
+                reps: String(s.reps || '')
+            }));
+            saveState();
+            renderActiveWorkout();
+            showToast(`Semua ${prevSets.length} set sesi lepas disalin!`);
+        }
+
+        function refreshExerciseFeedback(exIdx, setIdx) {
+            const exItem = appState.activeWorkout.exercises[exIdx];
+            const setObj = exItem.sets[setIdx];
+            const status = computeOverloadText(exItem.exerciseId, setIdx, setObj.weight, setObj.reps);
+            const ovlEl = document.getElementById(`ovl-${exIdx}-${setIdx}`);
+            if (ovlEl) {
+                ovlEl.textContent = status.text;
+                ovlEl.className = `overload-status ${status.cls}`;
+            }
+            const warnEl = document.getElementById(`set-warn-${exIdx}`);
+            if (warnEl) {
+                const wText = getSetCountWarningText(exItem.exerciseId, exItem.sets);
+                warnEl.textContent = wText || '';
+                warnEl.style.display = wText ? 'flex' : 'none';
+            }
+        }
+
+        function handleDirectInput(exIdx, setIdx, field, rawVal) {
+            const cleaned = rawVal.replace(',', '.').replace(/[^0-9.]/g, '');
+            appState.activeWorkout.exercises[exIdx].sets[setIdx][field] = cleaned;
+            saveState();
+            refreshExerciseFeedback(exIdx, setIdx);
+        }
+
+        function stepSetField(exIdx, setIdx, field, delta) {
+            const setObj = appState.activeWorkout.exercises[exIdx].sets[setIdx];
+            const curr = parseFloat(setObj[field]) || 0;
+            const next = Math.round(Math.max(0, curr + delta) * 100) / 100;
+            setObj[field] = String(next);
+            saveState();
+            const inp = document.getElementById(field === 'weight' ? `inp-w-${exIdx}-${setIdx}` : `inp-r-${exIdx}-${setIdx}`);
+            if (inp) inp.value = setObj[field];
+            refreshExerciseFeedback(exIdx, setIdx);
+        }
+
+        function addSet(exIdx) {
+            const sets = appState.activeWorkout.exercises[exIdx].sets;
+            const prev = sets.length ? sets[sets.length - 1] : { weight: '', reps: '' };
+            sets.push({ weight: prev.weight, reps: prev.reps });
+            saveState();
+            renderActiveWorkout();
+        }
+
+        function removeSet(exIdx, setIdx) {
+            appState.activeWorkout.exercises[exIdx].sets.splice(setIdx, 1);
+            saveState();
+            renderActiveWorkout();
+        }
+
+        function removeExercise(exIdx) {
+            appState.activeWorkout.exercises.splice(exIdx, 1);
+            saveState();
+            renderActiveWorkout();
+        }
+
+        function markSetDone(exIdx, setIdx) {
+            saveState();
+            if (appState.settings.restTimerEnabled) {
+                startRestTimer(appState.settings.defaultRestSeconds || 90);
+                showToast(`Set #${setIdx + 1} selesai! Pemasa rehat bermula.`);
+            } else {
+                showToast(`Set #${setIdx + 1} selesai!`);
+            }
+        }
+
+        function openExercisePicker() {
+            document.getElementById('picker-search').value = '';
+            renderPickerList();
+            document.getElementById('modal-picker').classList.add('open');
+        }
+
+        function renderPickerList() {
+            const q = document.getElementById('picker-search').value.toLowerCase();
+            const matches = appState.exercises.filter(e => e.name.toLowerCase().includes(q) || e.muscle.toLowerCase().includes(q));
+            document.getElementById('picker-list').innerHTML = matches.map(ex => `
+                <div class="list-item" style="cursor:pointer;" onclick="selectExerciseForWorkout('${escapeHTML(ex.id)}')">
+                    <div>
+                        <div style="font-size:14px; font-weight:700;">${escapeHTML(ex.name)}</div>
+                        <div class="card-sub">${escapeHTML(ex.muscle)}</div>
+                    </div>
+                    <span class="btn btn-primary btn-sm">+ Pilih</span>
+                </div>
+            `).join('') || '<div class="card-sub">Tiada senaman dijumpai.</div>';
+        }
+
+        function selectExerciseForWorkout(exId) {
+            const prevSets = getPreviousSets(exId);
+            const initSets = prevSets?.length
+                ? prevSets.map(s => ({ weight: String(s.weight), reps: String(s.reps) }))
+                : [{ weight: '', reps: '' }, { weight: '', reps: '' }, { weight: '', reps: '' }];
+
+            appState.activeWorkout.exercises.push({ exerciseId: exId, sets: initSets });
+            saveState();
+            closeModal('modal-picker');
+            renderActiveWorkout();
+            showToast('Senaman ditambah!');
+        }
+
+        function finishWorkout() {
+            if (!appState.activeWorkout.exercises.length) {
+                showToast('Sila tambah sekurang-kurangnya 1 senaman.');
+                return;
+            }
+
+            const cleaned = appState.activeWorkout.exercises.map(ex => ({
+                exerciseId: ex.exerciseId,
+                sets: ex.sets.filter(s => s.weight !== '' || s.reps !== '').map(s => ({
+                    weight: parseFloat(s.weight) || 0,
+                    reps: parseInt(s.reps, 10) || 0
+                }))
+            })).filter(ex => ex.sets.length > 0);
+
+            if (!cleaned.length) {
+                showToast('Sila isi sekurang-kurangnya 1 set sebelum simpan.');
+                return;
+            }
+
+            const warnings = [];
+            cleaned.forEach(ex => {
+                const prevStats = getPreviousSessionStats(ex.exerciseId);
+                if (!prevStats) return;
+                const meta = appState.exercises.find(e => e.id === ex.exerciseId) || { name: 'Senaman' };
+                const currMaxW = Math.max(...ex.sets.map(s => s.weight));
+                const currMaxR = Math.max(...ex.sets.map(s => s.reps));
+                const issues = [];
+                if (ex.sets.length < prevStats.setCount) issues.push(`Set kurang (${ex.sets.length}/${prevStats.setCount})`);
+                if (currMaxW < prevStats.maxWeight) issues.push(`Berat max kurang (${currMaxW}kg vs ${prevStats.maxWeight}kg)`);
+                if (currMaxW === prevStats.maxWeight && currMaxR < prevStats.maxReps) issues.push(`Rep kurang (${currMaxR} vs ${prevStats.maxReps})`);
+                if (issues.length) warnings.push(`• ${meta.name}: ${issues.join(', ')}`);
+            });
+
+            const commit = () => {
+                appState.workouts.unshift({
+                    id: 'wk_' + Date.now(),
+                    title: appState.activeWorkout.title || 'Sesi Gym',
+                    date: new Date().toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    exercises: cleaned
+                });
+                appState.activeWorkout = { title: 'Sesi Latihan Seterusnya', exercises: [] };
+                stopRestTimer();
+                saveState();
+                renderActiveWorkout();
+                switchTab('sejarah');
+                showToast('Sesi latihan berjaya disimpan!');
+            };
+
+            if (warnings.length) {
+                askConfirm('⚠️ Amaran Prestasi Kurang', `Terdapat penurunan berbanding sesi lepas:\n${warnings.join('\n')}\n\nSimpan juga sesi ini?`, commit);
+            } else {
+                commit();
+            }
+        }
+
+        // ==========================================
+        // 8. REST TIMER, HISTORY & BACKUP
+        // ==========================================
+        function toggleRestSetting(isEnabled) {
+            appState.settings.restTimerEnabled = isEnabled;
+            document.getElementById('default-rest-group').style.opacity = isEnabled ? '1' : '0.45';
+            if (!isEnabled) stopRestTimer();
+            saveState();
+            showToast(isEnabled ? 'Pemasa Rehat: ON' : 'Pemasa Rehat: OFF');
+        }
+
+        function updateDefaultRest(sec) {
+            appState.settings.defaultRestSeconds = parseInt(sec, 10) || 90;
+            saveState();
+            showToast(`Masa rehat: ${sec} saat`);
+        }
+
+        function formatSeconds(sec) {
+            return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+        }
+
+        function startRestTimer(seconds) {
+            if (!appState.settings.restTimerEnabled) return;
+            clearInterval(restInterval);
+            restRemaining = seconds;
+            document.getElementById('header-rest-pill').classList.add('active');
+            updateRestDisplays();
+            restInterval = setInterval(() => {
+                restRemaining--;
+                updateRestDisplays();
+                if (restRemaining <= 0) {
+                    stopRestTimer();
+                    showToast('⏰ Masa rehat tamat!');
+                }
+            }, 1000);
+        }
+
+        function stopRestTimer() {
+            clearInterval(restInterval);
+            restRemaining = 0;
+            document.getElementById('header-rest-pill').classList.remove('active');
+        }
+
+        function updateRestDisplays() {
+            const str = formatSeconds(restRemaining);
+            document.getElementById('header-rest-time').textContent = str;
+            document.getElementById('modal-rest-display').textContent = str;
+        }
+
+        function openRestModal() {
+            document.getElementById('modal-rest-display').textContent = formatSeconds(restRemaining || appState.settings.defaultRestSeconds);
+            document.getElementById('modal-rest').classList.add('open');
+        }
+
+        function renderHistoryAndLibrary() {
+            document.getElementById('history-count-label').textContent = `${appState.workouts.length} sesi direkodkan`;
+            const histList = document.getElementById('workout-history-list');
+
+            histList.innerHTML = appState.workouts.length ? appState.workouts.map((wk, idx) => `
+                <div class="set-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:14px; font-weight:700;">${escapeHTML(wk.title)}</div>
+                            <div class="card-sub">${escapeHTML(wk.date)}</div>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteWorkoutHistory(${idx})">Padam</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        ${wk.exercises.map(ex => {
+                            const meta = appState.exercises.find(e => e.id === ex.exerciseId) || { name: 'Senaman' };
+                            return `<div style="font-size:12px;"><strong>${escapeHTML(meta.name)}:</strong> ${ex.sets.map(s => `<span class="tag-pill">${s.weight}kg × ${s.reps}</span>`).join('')}</div>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('') : '<div class="card-sub">Tiada sejarah workout lagi.</div>';
+
+            document.getElementById('bc-history-count-label').textContent = `${appState.bodyComps.length} rekod timbangan`;
+            const bcFullList = document.getElementById('bc-full-history-list');
+            bcFullList.innerHTML = appState.bodyComps.length ? appState.bodyComps.map((item, idx) => {
+                const h = parseFloat(item.height) || parseFloat(appState.settings.userHeightCm) || 0;
+                const ev = getBmiEvaluation(item.bmi, h, item.weight);
+                const optText = ev.optMin !== null ? ` • Optimum: ${ev.optMin}–${ev.optMax}kg` : '';
+                return `
+                    <div class="list-item">
+                        <div>
+                            <div style="font-size:13px; font-weight:700;">${escapeHTML(item.date)} ${h > 50 ? `<span class="badge badge-neutral">${h} cm</span>` : ''}</div>
+                            <div class="card-sub">Berat: ${item.weight}kg • SMM: ${item.smm}kg • BFP: ${item.bfp}%</div>
+                            <div class="card-sub">BMI: <strong>${item.bmi}</strong> (${ev.isNormal ? 'Normal' : 'Tidak Normal'})${optText}</div>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteBodyComp(${idx})">Padam</button>
+                    </div>
+                `;
+            }).join('') : '<div class="card-sub">Tiada rekod timbangan lagi.</div>';
+
+            document.getElementById('library-list').innerHTML = appState.exercises.map(ex => {
+                let maxW = 0;
+                appState.workouts.forEach(w => {
+                    const m = w.exercises.find(item => item.exerciseId === ex.id);
+                    if (m) {
+                        m.sets.forEach(s => {
+                            if (s.weight > maxW) maxW = s.weight;
+                        });
+                    }
+                });
+                return `
+                    <div class="list-item">
+                        <div>
+                            <div style="font-size:14px; font-weight:700;">${escapeHTML(ex.name)}</div>
+                            <div class="card-sub">${escapeHTML(ex.muscle)}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:10px; color:var(--text-secondary);">REKOD MAX</div>
+                            <div style="font-size:14px; font-weight:800; color:var(--accent);">${maxW} kg</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteWorkoutHistory(idx) {
+            askConfirm('Padam Rekod', 'Padam rekod workout ini?', () => {
+                appState.workouts.splice(idx, 1);
+                saveState();
+                renderHistoryAndLibrary();
+                showToast('Rekod dipadam');
+            });
+        }
+
+        function openNewExerciseModal() {
+            document.getElementById('new-ex-name').value = '';
+            document.getElementById('modal-new-ex').classList.add('open');
+        }
+
+        function saveNewExercise(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-ex-name').value.trim();
+            const muscle = document.getElementById('new-ex-muscle').value;
+            if (!name) return;
+            appState.exercises.push({ id: 'ex_' + Date.now(), name, muscle });
+            saveState();
+            closeModal('modal-new-ex');
+            renderHistoryAndLibrary();
+            showToast('Senaman baru ditambah!');
+        }
+
+        function exportBackup() {
+            const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ProgressiveOverloadTracker_${getTodayISO()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Backup berjaya dimuat turun!');
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.exercises && parsed.workouts) {
+                        appState = {
+                            ...loadState(),
+                            ...parsed,
+                            nutrition: parsed.nutrition || loadState().nutrition
+                        };
+                        saveState();
+                        initApp();
+                        showToast('Backup berjaya dipulihkan!');
+                    } else {
+                        showToast('Fail backup tidak sah.');
+                    }
+                } catch (err) {
+                    showToast('Ralat membaca fail JSON.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function confirmResetAll() {
+            askConfirm('Padam Semua Data', 'Semua rekod latihan, nutrition & kunci API akan dipadam kekal. Teruskan?', () => {
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem('po_tracker_v4_data');
+                localStorage.removeItem(ENCLAVE_CIPHER_KEY);
+                appState = loadState();
+                initApp();
+                showToast('Semua data ditetapkan semula.');
+            });
+        }
+
+        function initApp() {
+            document.getElementById('today-date').textContent = new Date().toLocaleDateString('ms-MY', {
+                weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+            });
+            document.getElementById('toggle-rest-timer').checked = appState.settings.restTimerEnabled;
+            document.getElementById('default-rest-select').value = String(appState.settings.defaultRestSeconds);
+            document.getElementById('default-rest-group').style.opacity = appState.settings.restTimerEnabled ? '1' : '0.45';
+
+            updateGeminiStatusUI();
+            renderBodyCompSection();
+            renderActiveWorkout();
+            renderNutritionTab();
+            renderHistoryAndLibrary();
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
